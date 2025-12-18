@@ -4,77 +4,53 @@ package az.kapitalbank.mb.bff.transfermobile.services;
 import az.kapitalbank.mb.bff.transfermobile.dtos.requests.CreateCustomerRequest;
 import az.kapitalbank.mb.bff.transfermobile.dtos.responses.CustomerResponse;
 import az.kapitalbank.mb.bff.transfermobile.entities.Customer;
+import az.kapitalbank.mb.bff.transfermobile.exceptions.CustomerNotFoundException;
+import az.kapitalbank.mb.bff.transfermobile.mappers.CustomerMapper;
 import az.kapitalbank.mb.bff.transfermobile.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
-    public CustomerResponse createCustomer(CreateCustomerRequest createCustomerRequest) {
-        Customer customer = Customer.builder()
-                .firstName(createCustomerRequest.getFirstName())
-                .lastName(createCustomerRequest.getLastName())
-                .pin(createCustomerRequest.getPin())
-                .dateOfBirth(createCustomerRequest.getDateOfBirth())
-                .createdAt(createCustomerRequest.getCreatedAt())
-                .build();
-
-        Customer savedCustomer=customerRepository.save(customer);
-
-         return CustomerResponse.builder()
-                .id(savedCustomer.getId())
-                .firstName(savedCustomer.getFirstName())
-                .lastName(savedCustomer.getLastName())
-                .age(savedCustomer.getAge()) // dynamic calculation
-                .pin(savedCustomer.getPin())
-                .dateOfBirth(savedCustomer.getDateOfBirth())
-                .createdAt(savedCustomer.getCreatedAt())
-                .build();
-
+    public CustomerResponse createCustomer(CreateCustomerRequest request) {
+        Customer customer = customerMapper.toEntity(request);
+        customer.setCreatedAt(LocalDateTime.now());
+        Customer savedCustomer = customerRepository.save(customer);
+        return customerMapper.toResponse(savedCustomer);
     }
 
-
     public CustomerResponse getCustomerById(Long id) {
-        Customer customer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
-      return   CustomerResponse.builder()
-              .firstName(customer.getFirstName())
-              .lastName(customer.getLastName())
-              .age(customer.getAge())
-              .pin(customer.getPin())
-              .build();
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException(id));
+        return customerMapper.toResponse(customer);
     }
 
     public List<CustomerResponse> getAllCustomers() {
-        return customerRepository.findAll().stream()
-                .map(customer -> CustomerResponse.builder()
-                        .id(customer.getId())
-                        .firstName(customer.getFirstName())
-                        .lastName(customer.getLastName())
-                        .age(customer.getAge()) // dynamically calculated
-                        .pin(customer.getPin())
-                        .dateOfBirth(customer.getDateOfBirth())
-                        .createdAt(customer.getCreatedAt())
-                        .build())
-                .toList();
+        return customerMapper.toResponseList(customerRepository.findAll());
     }
 
 
+    public Customer update(Long id, Customer customer) {
+        Customer updatedCustomer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException(id));
 
-    public Customer update(Long id,Customer customer) {
-        Customer updatedCustomer = customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
         updatedCustomer.setFirstName(customer.getFirstName());
         updatedCustomer.setLastName(customer.getLastName());
         updatedCustomer.setPin(customer.getPin());
-        updatedCustomer.setAge(customer.getAge());
+        updatedCustomer.setDateOfBirth(customer.getDateOfBirth());
+
         return customerRepository.save(updatedCustomer);
     }
 
+
     public void delete(Long id) {
-        customerRepository.delete(customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer not found")));
+        customerRepository.delete(customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id)));
     }
 }

@@ -1,11 +1,22 @@
 package az.kapitalbank.mb.bff.transfermobile.entities;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 
 @Entity
 @Getter
@@ -18,17 +29,23 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    @Column(name = "firstName")
     String firstName;
+    @Column(name = "lastName")
     String lastName;
-    @Transient
-    Integer age;
+    @Column(name = "pin")
     String pin;
+    @Column(name = "dateOfBirth")
     LocalDate dateOfBirth;
+    @Column(name = "createdAt")
     LocalDateTime createdAt;
 
+    @Transient
     public Integer getAge() {
-        if (dateOfBirth == null) return 0;
-        return java.time.Period.between(dateOfBirth, java.time.LocalDate.now()).getYears();
+        if (dateOfBirth == null) {
+            return 0;
+        }
+        return Period.between(dateOfBirth, LocalDate.now()).getYears();
     }
 
 }
