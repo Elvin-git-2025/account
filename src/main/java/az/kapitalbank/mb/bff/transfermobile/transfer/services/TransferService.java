@@ -2,12 +2,15 @@ package az.kapitalbank.mb.bff.transfermobile.transfer.services;
 
 import az.kapitalbank.mb.bff.transfermobile.customer.services.CustomerService;
 import az.kapitalbank.mb.bff.transfermobile.transfer.dtos.requests.CreateTransferRequest;
+import az.kapitalbank.mb.bff.transfermobile.transfer.dtos.responses.TransferResponse;
 import az.kapitalbank.mb.bff.transfermobile.transfer.entities.Transfer;
 import az.kapitalbank.mb.bff.transfermobile.transfer.enums.TransferStatus;
 import az.kapitalbank.mb.bff.transfermobile.transfer.enums.TransferType;
 import az.kapitalbank.mb.bff.transfermobile.transfer.exceptions.InvalidTransferException;
+import az.kapitalbank.mb.bff.transfermobile.transfer.exceptions.TransferNotFoundException;
 import az.kapitalbank.mb.bff.transfermobile.transfer.mappers.TransferMapper;
 import az.kapitalbank.mb.bff.transfermobile.transfer.repositories.TransferRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -77,4 +80,49 @@ public class TransferService {
         };
         return amount.multiply(rate);
     }
+
+    public TransferResponse getTransferById(Long id) {
+        if (id == null || id <= 0) {
+            throw new InvalidTransferException("Transfer id must be positive");
+        }
+        Transfer transfer1 = transferRepository.findById(id)
+                .orElseThrow(() -> new TransferNotFoundException(id));
+        return transferMapper.convertToResponse(transfer1);
+    }
+
+   @Transactional
+    public TransferResponse cancelTransfer(Long id) {
+        if (id == null || id <= 0) {
+            throw new InvalidTransferException("Transfer id must be positive");
+        }
+        Transfer transfer = transferRepository.findById(id)
+                .orElseThrow(() -> new TransferNotFoundException(id));
+
+        if (transfer.getStatus() == TransferStatus.PENDING) {
+            throw new InvalidTransferException("Only PENDING transfers can be cancelled");
+        }
+
+        transfer.setStatus(TransferStatus.CANCELED);
+        return transferMapper.convertToResponse(transferRepository.save(transfer));
+   }
+
+   public TransferResponse updateTransfer(Long id, TransferStatus status) {
+        if (id == null || id <= 0) {
+            throw new InvalidTransferException("Transfer id must be positive");
+        }
+       if (status == null) {
+           throw new InvalidTransferException("Transfer status must not be null");
+       }
+
+        Transfer transfer = transferRepository.findById(id)
+                .orElseThrow(() -> new TransferNotFoundException(id));
+       if (transfer.getStatus() != TransferStatus.PENDING) {
+           throw new InvalidTransferException(
+                   "Only PENDING transfers can change status"
+           );
+       }
+        transfer.setStatus(status);
+        return transferMapper.convertToResponse(transferRepository.save(transfer));
+   }
+
 }
