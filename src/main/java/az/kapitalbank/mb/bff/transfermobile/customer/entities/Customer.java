@@ -9,7 +9,6 @@ import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
-import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -23,21 +22,20 @@ import java.time.Period;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column(name = "firstName")
+    @Column(name = "first_name")
     String firstName;
-    @Column(name = "lastName")
+    @Column(name = "last_name")
     String lastName;
     @Column(name = "pin")
     String pin;
-    @Column(name = "dateOfBirth")
+    @Column(name = "date_of_birth")
     LocalDate dateOfBirth;
-    @Column(name = "createdAt")
+    @Column(name = "created_at")
     LocalDateTime createdAt;
 
     @Transient

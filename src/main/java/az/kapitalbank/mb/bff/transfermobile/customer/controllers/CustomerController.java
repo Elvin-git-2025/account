@@ -1,9 +1,8 @@
 package az.kapitalbank.mb.bff.transfermobile.customer.controllers;
 
 import az.kapitalbank.mb.bff.transfermobile.customer.dtos.requests.CreateCustomerRequest;
+import az.kapitalbank.mb.bff.transfermobile.customer.dtos.requests.UpdateCustomerRequest;
 import az.kapitalbank.mb.bff.transfermobile.customer.dtos.responses.CustomerResponse;
-import az.kapitalbank.mb.bff.transfermobile.customer.entities.Customer;
-import az.kapitalbank.mb.bff.transfermobile.customer.repositories.CustomerRepository;
 import az.kapitalbank.mb.bff.transfermobile.customer.services.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,39 +24,39 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
-    private final CustomerRepository customerRepository;
 
     @GetMapping("/{id}/exists")
     public boolean exists(@PathVariable Long id) {
-        return customerRepository.existsById(id);
+        return customerService.existsById(id);
     }
 
-    @PostMapping("/create")
+
+    @PostMapping
     public ResponseEntity<CustomerResponse> create(
             @Valid @RequestBody CreateCustomerRequest request) {
         return ResponseEntity.ok(customerService.createCustomer(request));
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long id) {
         CustomerResponse customer = customerService.getCustomerById(id);
         return ResponseEntity.ok(customer);
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public ResponseEntity<List<CustomerResponse>> getAllCustomers() {
         return ResponseEntity.ok(customerService.getAllCustomers());
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Customer> updateCustomer(
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable Long id,
-            @RequestBody Customer customer) {
-        Customer updatedCustomer = customerService.update(id, customer);
-        return ResponseEntity.ok(updatedCustomer);
+            @RequestBody UpdateCustomerRequest request) {
+
+        return ResponseEntity.ok(customerService.update(id, request));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable Long id) {
         customerService.delete(id);
     }

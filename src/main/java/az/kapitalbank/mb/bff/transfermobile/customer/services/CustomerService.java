@@ -2,6 +2,7 @@ package az.kapitalbank.mb.bff.transfermobile.customer.services;
 
 
 import az.kapitalbank.mb.bff.transfermobile.customer.dtos.requests.CreateCustomerRequest;
+import az.kapitalbank.mb.bff.transfermobile.customer.dtos.requests.UpdateCustomerRequest;
 import az.kapitalbank.mb.bff.transfermobile.customer.dtos.responses.CustomerResponse;
 import az.kapitalbank.mb.bff.transfermobile.customer.entities.Customer;
 import az.kapitalbank.mb.bff.transfermobile.customer.exceptions.CustomerNotFoundException;
@@ -36,22 +37,24 @@ public class CustomerService {
         return customerMapper.toResponseList(customerRepository.findAll());
     }
 
+    public boolean existsById(Long id) {
+        return customerRepository.existsById(id);
+    }
 
-    public Customer update(Long id, Customer customer) {
-        Customer updatedCustomer = customerRepository.findById(id)
+    public CustomerResponse update(Long id, UpdateCustomerRequest request) {
+        Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
 
-        updatedCustomer.setFirstName(customer.getFirstName());
-        updatedCustomer.setLastName(customer.getLastName());
-        updatedCustomer.setPin(customer.getPin());
-        updatedCustomer.setDateOfBirth(customer.getDateOfBirth());
+        customerMapper.updateCustomerFromRequest(request, customer);
 
-
-        return customerRepository.save(updatedCustomer);
+        return customerMapper.toResponse(customerRepository.save(customer));
     }
 
 
     public void delete(Long id) {
-        customerRepository.delete(customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id)));
+        if (!customerRepository.existsById(id)) {
+            throw new CustomerNotFoundException(id);
+        }
+        customerRepository.deleteById(id);
     }
 }
