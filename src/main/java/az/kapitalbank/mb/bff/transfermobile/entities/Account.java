@@ -31,4 +31,7 @@ public class Account {
 
     @Column(nullable = false)
      LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+     LocalDateTime createdAt;
 }
