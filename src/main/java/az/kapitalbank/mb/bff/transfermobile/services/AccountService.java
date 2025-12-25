@@ -19,6 +19,8 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
 
+
+
     public BigDecimal getBalance(Long customerId) {
         Account account = getAccount(customerId);
         return account.getBalance();
