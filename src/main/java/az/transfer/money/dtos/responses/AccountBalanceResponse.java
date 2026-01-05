@@ -1,0 +1,15 @@
+package az.transfer.money.dtos.responses;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+
+import java.math.BigDecimal;
+
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public class AccountBalanceResponse {
+    private BigDecimal balance;
+}
