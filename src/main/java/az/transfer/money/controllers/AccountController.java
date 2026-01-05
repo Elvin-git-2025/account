@@ -29,13 +29,16 @@ public class AccountController {
     }
 
     @GetMapping("/{customerId}/balance")
-    public AccountBalanceResponse getBalance(
+    public ResponseEntity<AccountBalanceResponse> getBalance(
             @PathVariable Long customerId
     ) {
-        return new AccountBalanceResponse(
+        AccountBalanceResponse response = new AccountBalanceResponse(
                 accountService.getBalance(customerId)
         );
+
+        return ResponseEntity.ok().body(response);
     }
+
 
     @PostMapping("/{customerId}/debit")
     public void debit(
